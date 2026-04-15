@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SmartCart+ — AI Grocery Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F3EE;--surf:#FFFFFF;--s2:#EDEBE4;--s3:#E2DFD7;
+  --bdr:#D6D2CA;--bdr2:#B5B0A5;
+  --tx:#16140D;--tx2:#524E47;--tx3:#908C85;
+  --g:#2A5F3F;--g2:#3D9E64;--gbg:#D2EFE0;--gb:#96D8B2;
+  --a:#AD5907;--abg:#FDF0DF;--ab:#F4C472;
+  --r:#B02B2B;--rbg:#FCEAEA;--rb:#EEAAAA;
+  --b:#1A4D78;--bbg:#E3F0FA;--bb:#90C3E8;
+  --p:#5A2A88;--pbg:#EEE6FA;--pb:#BF99E0;
+  --rr:9px;--rlg:15px;
+  --sh:0 1px 7px rgba(0,0,0,.07);--shm:0 4px 20px rgba(0,0,0,.12);
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --tr:all .16s cubic-bezier(.4,0,.2,1);
+}
+html,body{height:100%;font-family:var(--fb);background:var(--bg);color:var(--tx);font-size:14px}
+#app{display:flex;flex-direction:column;min-height:100vh}
+.hdr{background:var(--surf);border-bottom:1px solid var(--bdr);padding:0 20px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:200;box-shadow:var(--sh)}
+.logo{width:34px;height:34px;background:var(--g);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:18px;height:18px}
+.appname{font-family:var(--fd);font-size:16px;font-weight:700;letter-spacing:-.3px}
+.plus{color:var(--g2)}
+.hright{margin-left:auto;display:flex;gap:8px;align-items:center}
+.hbadge{display:flex;align-items:center;gap:4px;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:500;border:1px solid}
+.hbg{background:var(--gbg);border-color:var(--gb);color:var(--g)}
+.hba{background:var(--abg);border-color:var(--ab);color:var(--a)}
+.nav{background:var(--surf);border-bottom:1px solid var(--bdr);display:flex;padding:0 20px;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nb{display:flex;align-items:center;gap:6px;padding:14px 15px;font-family:var(--fb);font-size:13px;font-weight:500;color:var(--tx2);background:none;border:none;border-bottom:2.5px solid transparent;white-space:nowrap;cursor:pointer;transition:var(--tr)}
+.nb:hover{color:var(--tx)}
+.nb.on{color:var(--g);border-bottom-color:var(--g)}
+.main{flex:1;padding:24px 20px;max-width:1060px;margin:0 auto;width:100%}
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rlg);box-shadow:var(--sh);overflow:hidden;margin-bottom:18px}
+.ch{padding:17px 22px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:11px}
+.chi{width:34px;height:34px;border-radius:var(--rr);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.ct{font-family:var(--fd);font-size:14.5px;font-weight:700}
+.cs{font-size:11.5px;color:var(--tx3);margin-top:2px}
+.cb{padding:18px 22px}
+.cact{margin-left:auto;display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--rr);font-size:13px;font-weight:500;border:none;cursor:pointer;transition:var(--tr);font-family:var(--fb)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.bp{background:var(--g);color:#fff}.bp:hover:not(:disabled){background:#1f4530}
+.bg2{background:none;color:var(--tx2);border:1px solid var(--bdr)}.bg2:hover:not(:disabled){background:var(--s2)}
+.bd{background:var(--rbg);color:var(--r);border:1px solid var(--rb)}.bd:hover:not(:disabled){background:var(--rb)}
+.bsm{padding:5px 12px;font-size:12px}
+.bfull{width:100%;justify-content:center}
+.inp{width:100%;padding:9px 13px;border-radius:var(--rr);border:1px solid var(--bdr);background:var(--s2);font-size:13px;color:var(--tx);outline:none;transition:var(--tr);font-family:var(--fb)}
+.inp:focus{border-color:var(--g2);background:var(--surf);box-shadow:0 0 0 3px rgba(61,158,100,.12)}
+textarea.inp{resize:vertical;min-height:78px}
+.sel{padding:8px 12px;border-radius:var(--rr);border:1px solid var(--bdr);background:var(--s2);font-size:13px;color:var(--tx);outline:none;cursor:pointer;font-family:var(--fb);width:100%}
+.sel:focus{border-color:var(--g2)}
+.fl{font-size:12px;color:var(--tx3);display:block;margin-bottom:5px}
+.irow{display:flex;gap:9px;margin-bottom:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:640px){.two{grid-template-columns:1fr}.rgrid{grid-template-columns:1fr!important}.wgrid{grid-template-columns:repeat(4,1fr)!important}}
+.srow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.sc{background:var(--s2);border-radius:var(--rr);padding:12px 16px;flex:1;min-width:90px}
+.sn{font-family:var(--fd);font-size:24px;font-weight:700;color:var(--g)}
+.sl{font-size:11px;color:var(--tx3);margin-top:1px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:500;border:1px solid;cursor:default}
+.cg{background:var(--gbg);color:var(--g);border-color:var(--gb)}
+.ca{background:var(--abg);color:var(--a);border-color:var(--ab)}
+.cr{background:var(--rbg);color:var(--r);border-color:var(--rb)}
+.cb2{background:var(--bbg);color:var(--b);border-color:var(--bb)}
+.cp{background:var(--pbg);color:var(--p);border-color:var(--pb)}
+.cgr{background:var(--s2);color:var(--tx2);border-color:var(--bdr)}
+.ck{cursor:pointer!important}.ck:hover{filter:brightness(.92)}
+.dvd{height:1px;background:var(--bdr);margin:14px 0}
+.slbl{font-family:var(--fd);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.slbl::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.plist{list-style:none}
+.pitem{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--bdr)}
+.pitem:last-child{border-bottom:none}
+.pn{flex:1;font-size:13px}
+.pc{font-size:11.5px;color:var(--tx3)}
+.rmb{width:21px;height:21px;border-radius:50%;background:none;border:1px solid var(--bdr);color:var(--tx3);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--tr);flex-shrink:0}
+.rmb:hover{background:var(--rbg);border-color:var(--rb);color:var(--r)}
+.sitem{display:flex;align-items:flex-start;gap:11px;padding:9px 13px;border-radius:var(--rr);border:1px solid var(--bdr);background:var(--surf);margin-bottom:6px;cursor:pointer;transition:var(--tr)}
+.sitem:hover{background:var(--s2)}
+.sitem.done{opacity:.5}
+.sitem.done .snm{text-decoration:line-through}
+.schk{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--bdr2);background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;transition:var(--tr);margin-top:2px}
+.sitem.done .schk{background:var(--g);border-color:var(--g);color:#fff}
+.snm{font-size:13px;font-weight:500}
+.pbar{height:4px;background:var(--s2);border-radius:2px;overflow:hidden;margin:8px 0}
+.pfill{height:100%;background:var(--g2);border-radius:2px;transition:width .3s}
+.shopcat{margin-bottom:18px}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.rcard{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rlg);overflow:hidden;transition:var(--tr)}
+.rcard:hover{transform:translateY(-2px);box-shadow:var(--shm);border-color:var(--gb)}
+.rthumb{width:100%;height:150px;object-fit:cover;display:block}
+.rhdr{padding:14px 15px 10px;display:flex;align-items:flex-start;gap:10px}
+.remi{font-size:28px;line-height:1}
+.rname{font-family:var(--fd);font-size:13.5px;font-weight:700;margin-bottom:3px}
+.rmeta{font-size:11px;color:var(--tx3);display:flex;gap:8px;flex-wrap:wrap}
+.rdesc{padding:0 15px 10px;font-size:12.5px;color:var(--tx2);line-height:1.5}
+.rtags{padding:0 15px 12px;display:flex;gap:4px;flex-wrap:wrap}
+.rdvd{height:1px;background:var(--bdr);margin:0 15px}
+.rings{padding:12px 15px}
+.rrow{display:flex;align-items:center;gap:7px;margin-bottom:5px;font-size:12px}
+.hd{width:6px;height:6px;border-radius:50%;background:var(--g2);flex-shrink:0}
+.nd{width:6px;height:6px;border-radius:50%;background:var(--a);flex-shrink:0}
+.rfoot{padding:11px 15px;background:var(--s2);display:flex;gap:7px;align-items:center}
+.rsteps{padding:12px 15px}
+.strow{display:flex;gap:9px;margin-bottom:9px}
+.stnum{width:21px;height:21px;border-radius:50%;background:var(--g);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sttxt{font-size:12.5px;color:var(--tx2);line-height:1.55;flex:1}
+.rtip{background:var(--abg);border:1px solid var(--ab);border-radius:var(--rr);padding:9px 13px;font-size:12px;color:var(--a);margin-top:9px}
+.fbtn{background:none;border:none;font-size:17px;cursor:pointer;color:var(--tx3);transition:var(--tr);flex-shrink:0}
+.fbtn.on{color:#F0A500}
+.fitem{display:flex;align-items:center;gap:12px;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rr);padding:12px 15px;transition:var(--tr);margin-bottom:9px}
+.fitem:hover{border-color:var(--gb);box-shadow:var(--sh)}
+.fn{font-size:13px;font-weight:500;flex:1}
+.tabs{display:flex;gap:3px;background:var(--s2);border-radius:var(--rr);padding:3px;margin-bottom:18px}
+.tb{flex:1;padding:7px;border:none;background:none;border-radius:6px;font-size:12.5px;font-weight:500;color:var(--tx2);cursor:pointer;font-family:var(--fb);transition:var(--tr)}
+.tb.on{background:var(--surf);color:var(--g);box-shadow:var(--sh)}
+.wgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
+.dlbl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:7px;text-align:center}
+.mslot{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--rr);padding:7px;margin-bottom:6px;min-height:62px;transition:var(--tr)}
+.mslot:hover{border-color:var(--g2);background:var(--gbg)}
+.mslab{font-size:8.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:2px}
+.msname{font-size:10.5px;font-weight:500;line-height:1.35}
+.lstate{text-align:center;padding:36px 18px;color:var(--tx2)}
+.lico{font-size:30px;margin-bottom:10px;animation:pulse 1.3s ease-in-out infinite}
+.ltit{font-family:var(--fd);font-size:14px;font-weight:600;margin-bottom:6px}
+.lsub{font-size:13px;color:var(--tx3)}
+.lbar{height:3px;background:var(--gbg);border-radius:2px;overflow:hidden;margin:12px auto 0;max-width:160px}
+.lfill{height:100%;background:var(--g2);width:36%;animation:ls 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes ls{0%{transform:translateX(-220%)}100%{transform:translateX(560%)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.spn{display:inline-block;width:13px;height:13px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .6s linear infinite}
+.empty{text-align:center;padding:42px 18px;color:var(--tx3)}
+.eico{font-size:38px;margin-bottom:12px}
+.etit{font-family:var(--fd);font-size:14.5px;font-weight:600;color:var(--tx2);margin-bottom:5px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--tx);color:#fff;padding:9px 18px;border-radius:20px;font-size:12.5px;font-weight:500;box-shadow:var(--shm);z-index:999;animation:fin .2s ease;pointer-events:none;white-space:nowrap}
+.srcw{background:var(--bbg);color:var(--b);border:1px solid var(--bb);border-radius:20px;padding:1px 6px;font-size:9.5px;font-weight:500}
+.srcl{background:var(--s2);color:var(--tx2);border:1px solid var(--bdr);border-radius:20px;padding:1px 6px;font-size:9.5px;font-weight:500}
+.err{color:var(--r);font-size:12.5px;padding:10px 13px;background:var(--rbg);border:1px solid var(--rb);border-radius:var(--rr);margin-top:10px;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="hdr">
+    <div class="logo">
+      <svg viewBox="0 0 18 18" fill="none">
+        <path d="M3 9h12M9 3v12" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="6" cy="14" r="1.5" fill="#fff"/>
+        <circle cx="12" cy="14" r="1.5" fill="#fff"/>
+      </svg>
+    </div>
+    <div>
+      <div class="appname">SmartCart<span class="plus">+</span></div>
+      <div style="font-size:10.5px;color:var(--tx3)">AI Grocery Assistant</div>
+    </div>
+    <div class="hright">
+      <div class="hbadge hbg" id="hpbadge">&#x1F96C; <span id="hpc">0</span> items</div>
+      <div class="hbadge hba" id="hfav" style="display:none">&#x2B50; <span id="hfc">0</span></div>
+    </div>
+  </header>
+  <nav class="nav" id="mainnav">
+    <button class="nb on" data-tab="pantry">&#x1F9FA; My Pantry</button>
+    <button class="nb" data-tab="shop">&#x1F6D2; Shopping</button>
+    <button class="nb" data-tab="recipes">&#x1F468;&#x200D;&#x1F373; Recipes</button>
+    <button class="nb" data-tab="plan">&#x1F4C5; Meal Plan</button>
+  </nav>
+  <main class="main" id="main"></main>
+</div>
+<div id="toasts"></div>
+<script>
+"use strict";
+
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+const CATS = ["Produce","Dairy & Eggs","Meat & Seafood","Pantry & Dry Goods",
+  "Canned & Jarred","Frozen","Bakery","Beverages","Snacks","Condiments & Spices","Other"];
+const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const MOD  = ["Breakfast","Lunch","Dinner"];
+const MDB  = "https://www.themealdb.com/api/json/v1/1";
+
+const SAMPLE = [
+  {n:"Eggs",        q:"12",      c:"Dairy & Eggs",       f:"good"},
+  {n:"Cheddar Cheese",q:"1 block",c:"Dairy & Eggs",      f:"good"},
+  {n:"Chicken Breast",q:"2 lbs", c:"Meat & Seafood",     f:"soon"},
+  {n:"Penne Pasta", q:"1 box",   c:"Pantry & Dry Goods", f:"good"},
+  {n:"Olive Oil",   q:"1 bottle",c:"Condiments & Spices",f:"good"},
+  {n:"Tomatoes",    q:"4",       c:"Produce",             f:"soon"},
+  {n:"Garlic",      q:"2 bulbs", c:"Produce",             f:"good"},
+  {n:"Onion",       q:"3",       c:"Produce",             f:"good"},
+  {n:"Spinach",     q:"1 bag",   c:"Produce",             f:"soon"},
+  {n:"Greek Yogurt",q:"32 oz",   c:"Dairy & Eggs",        f:"soon"},
+  {n:"Brown Rice",  q:"2 lbs",   c:"Pantry & Dry Goods",  f:"good"},
+  {n:"Canned Tomatoes",q:"2 cans",c:"Canned & Jarred",    f:"good"},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const S = {
+  tab: "pantry",
+  pantry: JSON.parse(JSON.stringify(SAMPLE)),
+  favorites: [],
+  savedLists: [],
+  shopList: null, shopChecked: {}, shopReq: "", shopStore: "General", shopSubTab: "gen",
+  recipes: [], recipeQ: "", recipeExpanded: null, recipeSubTab: "find",
+  mealPlan: null, mealPrefs: {diet:"balanced", people:"4", budget:"moderate", avoid:""},
+};
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const d = document.createElement("div");
+  d.className = "toast"; d.textContent = msg;
+  document.getElementById("toasts").appendChild(d);
+  setTimeout(() => d.remove(), 2700);
+}
+
+function badges() {
+  document.getElementById("hpc").textContent = S.pantry.length;
+  document.getElementById("hfc").textContent = S.favorites.length;
+  document.getElementById("hfav").style.display = S.favorites.length ? "flex" : "none";
+}
+
+function loading(msg) {
+  return '<div class="lstate"><div class="lico">&#x1F916;</div><div class="ltit">Working on it&hellip;</div>' +
+    '<div class="lsub">' + msg + '</div><div class="lbar"><div class="lfill"></div></div></div>';
+}
+
+function pMatch(ingName, pantry) {
+  const n = ingName.toLowerCase(), nw = n.split(" ")[0];
+  return pantry.some(p => {
+    const pn = p.n.toLowerCase(), pw = pn.split(" ")[0];
+    return pn.includes(nw) || n.includes(pw) || nw.includes(pw) || pw.includes(nw);
+  });
+}
+
+// ── ROUTING ───────────────────────────────────────────────────────────────────
+function render() {
+  badges();
+  const m = document.getElementById("main");
+  m.innerHTML = "";
+  ({ pantry:renderPantry, shop:renderShop, recipes:renderRecipes, plan:renderPlan }[S.tab])(m);
+}
+
+document.getElementById("mainnav").addEventListener("click", e => {
+  const b = e.target.closest(".nb");
+  if (!b) return;
+  S.tab = b.dataset.tab;
+  document.querySelectorAll(".nb").forEach(x => x.classList.toggle("on", x === b));
+  render();
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TAB 1 — MY PANTRY
+// ══════════════════════════════════════════════════════════════════════════════
+function renderPantry(main) {
+  let filterCat = "All";
+
+  function draw() {
+    const soon   = S.pantry.filter(p => p.f === "soon").length;
+    const cats   = ["All", ...CATS.filter(c => S.pantry.some(p => p.c === c))];
+    const list   = filterCat === "All" ? S.pantry : S.pantry.filter(p => p.c === filterCat);
+
+    main.innerHTML =
+      '<div class="srow">' +
+        '<div class="sc"><div class="sn">' + S.pantry.length + '</div><div class="sl">Total items</div></div>' +
+        '<div class="sc"><div class="sn" style="color:var(--a)">' + soon + '</div><div class="sl">Expiring soon</div></div>' +
+        '<div class="sc"><div class="sn">' + new Set(S.pantry.map(p=>p.c)).size + '</div><div class="sl">Categories</div></div>' +
+      '</div>' +
+      '<div class="two">' +
+        // Left — Add form
+        '<div><div class="card">' +
+          '<div class="ch"><div class="chi" style="background:var(--bbg)">&#x270F;&#xFE0F;</div>' +
+            '<div><div class="ct">Add Item</div><div class="cs">Add any grocery item to your pantry</div></div></div>' +
+          '<div class="cb">' +
+            '<div class="irow"><input class="inp" id="aname" placeholder="Item name (e.g. Oat Milk)" style="flex:1"/>' +
+            '<input class="inp" id="aqty" placeholder="Qty" style="max-width:80px"/></div>' +
+            '<select class="sel" id="acat" style="margin-bottom:12px">' + CATS.map(c=>'<option>'+c+'</option>').join("") + '</select>' +
+            '<select class="sel" id="afresh" style="margin-bottom:14px">' +
+              '<option value="good">&#x1F7E2; Fresh / Good</option>' +
+              '<option value="soon">&#x1F7E1; Use Soon</option>' +
+              '<option value="expired">&#x1F534; Expired</option>' +
+            '</select>' +
+            '<button class="btn bp bfull" id="addbtn">&#x2795; Add to Pantry</button>' +
+            '<div class="dvd"></div>' +
+            '<button class="btn bg2 bfull" id="loadsample">&#x1F4CB; Load Sample Pantry</button>' +
+            '<button class="btn bg2 bfull" style="margin-top:8px;color:var(--r)" id="clearall">&#x1F5D1;&#xFE0F; Clear All</button>' +
+          '</div>' +
+        '</div></div>' +
+        // Right — List
+        '<div><div class="card">' +
+          '<div class="ch"><div class="chi" style="background:var(--gbg)">&#x1F9FA;</div>' +
+            '<div><div class="ct">My Pantry (' + S.pantry.length + ')</div>' +
+            '<div class="cs">Everything you currently have</div></div></div>' +
+          '<div class="cb">' +
+            '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:13px">' +
+              cats.map(c => '<span class="chip ' + (filterCat===c?"cg":"cgr") + ' ck" data-fc="' + encodeURIComponent(c) + '">' + c + '</span>').join("") +
+            '</div>' +
+            (list.length === 0
+              ? '<div class="empty" style="padding:20px 0"><div style="font-size:13px;color:var(--tx3)">No items. Add some above or load a sample!</div></div>'
+              : '<ul class="plist">' + list.map(it => {
+                  const dot = it.f==="expired"?"&#x1F534;":it.f==="soon"?"&#x1F7E1;":"&#x1F7E2;";
+                  return '<li class="pitem">' +
+                    '<span style="font-size:13px">' + dot + '</span>' +
+                    '<span class="pn">' + it.n + '</span>' +
+                    '<span class="pc">' + it.q + ' &middot; ' + it.c + '</span>' +
+                    '<button class="rmb" data-ri="' + S.pantry.indexOf(it) + '">&times;</button>' +
+                  '</li>';
+                }).join("") + '</ul>'
+            ) +
+          '</div>' +
+        '</div></div>' +
+      '</div>';
+
+    main.querySelector("#addbtn").onclick = () => {
+      const n = main.querySelector("#aname").value.trim();
+      if (!n) { toast("Enter an item name first"); return; }
+      S.pantry.push({ n, q: main.querySelector("#aqty").value || "1", c: main.querySelector("#acat").value, f: main.querySelector("#afresh").value });
+      toast('\u2713 "' + n + '" added to pantry');
+      badges(); draw();
+    };
+    main.querySelector("#aname").onkeydown = e => { if (e.key === "Enter") main.querySelector("#addbtn").click(); };
+    main.querySelector("#loadsample").onclick = () => { S.pantry = JSON.parse(JSON.stringify(SAMPLE)); toast("Sample pantry loaded!"); badges(); draw(); };
+    main.querySelector("#clearall").onclick = () => { if (confirm("Clear all pantry items?")) { S.pantry = []; badges(); draw(); } };
+    main.querySelectorAll("[data-fc]").forEach(chip => chip.onclick = () => { filterCat = decodeURIComponent(chip.dataset.fc); draw(); });
+    main.querySelectorAll("[data-ri]").forEach(btn => btn.onclick = () => { S.pantry.splice(parseInt(btn.dataset.ri), 1); badges(); draw(); });
+  }
+  draw();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TAB 2 — SHOPPING LIST  (rule-based, no account needed)
+// ══════════════════════════════════════════════════════════════════════════════
+const SHOP_RULES = {
+  pasta:      [{n:"Pasta",q:"2 lbs",c:"Pantry & Dry Goods",r:"Base for pasta dishes",p:"essential",rf:"Spaghetti Bolognese"},{n:"Canned Tomatoes",q:"4 cans",c:"Canned & Jarred",r:"Sauce base",p:"essential"},{n:"Parmesan Cheese",q:"4 oz",c:"Dairy & Eggs",r:"Finishing touch",p:"nice-to-have",sub:"Pecorino Romano"},{n:"Olive Oil",q:"1 bottle",c:"Condiments & Spices",r:"Cooking base",p:"essential"},{n:"Garlic",q:"2 bulbs",c:"Produce",r:"Essential flavour",p:"essential"},{n:"Onion",q:"3",c:"Produce",r:"Sauce base",p:"essential"},{n:"Tomato Paste",q:"2 cans",c:"Canned & Jarred",r:"Deepens sauce",p:"nice-to-have"}],
+  chicken:    [{n:"Chicken Breast",q:"3 lbs",c:"Meat & Seafood",r:"Main protein",p:"essential",sub:"Chicken thighs — more flavour"},{n:"Garlic",q:"2 bulbs",c:"Produce",r:"Flavour",p:"essential"},{n:"Lemon",q:"4",c:"Produce",r:"Brightens chicken",p:"nice-to-have"},{n:"Olive Oil",q:"1 bottle",c:"Condiments & Spices",r:"Cooking fat",p:"essential"},{n:"Paprika",q:"1 jar",c:"Condiments & Spices",r:"Seasoning",p:"nice-to-have"}],
+  vegetarian: [{n:"Chickpeas",q:"3 cans",c:"Canned & Jarred",r:"Plant protein",p:"essential",sub:"Lentils or black beans"},{n:"Quinoa",q:"1 bag",c:"Pantry & Dry Goods",r:"Complete protein grain",p:"nice-to-have",sub:"Brown rice"},{n:"Coconut Milk",q:"2 cans",c:"Canned & Jarred",r:"Creamy sauce base",p:"nice-to-have"},{n:"Curry Powder",q:"1 jar",c:"Condiments & Spices",r:"Key seasoning",p:"nice-to-have"},{n:"Spinach",q:"1 bag",c:"Produce",r:"Nutrition boost",p:"nice-to-have"}],
+  vegan:      [{n:"Chickpeas",q:"3 cans",c:"Canned & Jarred",r:"Plant protein",p:"essential"},{n:"Oat Milk",q:"2 cartons",c:"Beverages",r:"Dairy-free milk",p:"essential",sub:"Almond milk"},{n:"Tofu",q:"2 blocks",c:"Meat & Seafood",r:"Protein",p:"nice-to-have"},{n:"Nutritional Yeast",q:"1 jar",c:"Condiments & Spices",r:"Cheesy flavour without dairy",p:"nice-to-have"},{n:"Lentils",q:"1 bag",c:"Pantry & Dry Goods",r:"Iron-rich protein",p:"nice-to-have"}],
+  breakfast:  [{n:"Eggs",q:"2 dozen",c:"Dairy & Eggs",r:"Breakfast staple",p:"essential"},{n:"Rolled Oats",q:"large container",c:"Pantry & Dry Goods",r:"Oatmeal and overnight oats",p:"essential"},{n:"Greek Yogurt",q:"32 oz",c:"Dairy & Eggs",r:"Protein-packed",p:"essential",sub:"Coconut yogurt (dairy-free)"},{n:"Banana",q:"2 bunches",c:"Produce",r:"Smoothies and toppings",p:"nice-to-have"},{n:"Bread",q:"1 loaf",c:"Bakery",r:"Toast",p:"essential"},{n:"Mixed Berries",q:"2 pints",c:"Produce",r:"Antioxidant topping",p:"nice-to-have",sub:"Frozen berries (cheaper)"}],
+  salad:      [{n:"Romaine Lettuce",q:"2 heads",c:"Produce",r:"Salad base",p:"essential",sub:"Mixed greens"},{n:"Cherry Tomatoes",q:"2 pints",c:"Produce",r:"Sweetness",p:"essential"},{n:"Cucumber",q:"2",c:"Produce",r:"Crunch",p:"nice-to-have"},{n:"Olive Oil",q:"1 bottle",c:"Condiments & Spices",r:"Dressing base",p:"essential"},{n:"Balsamic Vinegar",q:"1 bottle",c:"Condiments & Spices",r:"Dressing",p:"nice-to-have",sub:"Red wine vinegar"},{n:"Feta Cheese",q:"4 oz",c:"Dairy & Eggs",r:"Topping",p:"nice-to-have",sub:"Goat cheese"}],
+  soup:       [{n:"Chicken Broth",q:"4 cartons",c:"Canned & Jarred",r:"Soup base",p:"essential",sub:"Vegetable broth"},{n:"Carrot",q:"2 lbs",c:"Produce",r:"Classic soup vegetable",p:"essential"},{n:"Celery",q:"1 bunch",c:"Produce",r:"Aromatic base",p:"essential"},{n:"Onion",q:"3",c:"Produce",r:"Flavour foundation",p:"essential"},{n:"Bay Leaves",q:"1 jar",c:"Condiments & Spices",r:"Classic seasoning",p:"nice-to-have"}],
+  mexican:    [{n:"Tortillas",q:"2 packs",c:"Bakery",r:"Tacos and wraps",p:"essential",sub:"Corn tortillas (gluten-free)"},{n:"Black Beans",q:"3 cans",c:"Canned & Jarred",r:"Protein and fibre",p:"essential",sub:"Pinto beans"},{n:"Avocado",q:"4",c:"Produce",r:"Guacamole and topping",p:"essential"},{n:"Lime",q:"6",c:"Produce",r:"Essential Mexican flavour",p:"essential"},{n:"Salsa",q:"2 jars",c:"Condiments & Spices",r:"Topping",p:"essential"},{n:"Sour Cream",q:"1 container",c:"Dairy & Eggs",r:"Cool topping",p:"nice-to-have",sub:"Greek yogurt"}],
+  asian:      [{n:"Soy Sauce",q:"1 large bottle",c:"Condiments & Spices",r:"Umami base",p:"essential",sub:"Coconut aminos (gluten-free)"},{n:"Sesame Oil",q:"1 bottle",c:"Condiments & Spices",r:"Finishing flavour",p:"essential"},{n:"Ginger",q:"1 large piece",c:"Produce",r:"Essential Asian seasoning",p:"essential"},{n:"Rice Noodles",q:"2 packs",c:"Pantry & Dry Goods",r:"Stir fry base",p:"nice-to-have"},{n:"Sesame Seeds",q:"1 jar",c:"Condiments & Spices",r:"Garnish",p:"nice-to-have"}],
+  healthy:    [{n:"Quinoa",q:"1 bag",c:"Pantry & Dry Goods",r:"Protein-rich grain",p:"nice-to-have",sub:"Brown rice"},{n:"Kale",q:"2 bunches",c:"Produce",r:"Nutrient-dense green",p:"nice-to-have",sub:"Spinach"},{n:"Chia Seeds",q:"1 bag",c:"Pantry & Dry Goods",r:"Omega-3s and fibre",p:"nice-to-have"},{n:"Tahini",q:"1 jar",c:"Condiments & Spices",r:"Healthy fat for dressings",p:"nice-to-have",sub:"Almond butter"},{n:"Lemon",q:"6",c:"Produce",r:"Brightens healthy dishes",p:"nice-to-have"}],
+  general:    [{n:"Olive Oil",q:"1 large bottle",c:"Condiments & Spices",r:"Cooking essential",p:"essential"},{n:"Garlic",q:"2 bulbs",c:"Produce",r:"Flavour base for everything",p:"essential"},{n:"Onion",q:"3",c:"Produce",r:"Cooking essential",p:"essential"},{n:"Canned Tomatoes",q:"4 cans",c:"Canned & Jarred",r:"Versatile sauce base",p:"essential"},{n:"Eggs",q:"1 dozen",c:"Dairy & Eggs",r:"Versatile protein",p:"essential"},{n:"Butter",q:"1 lb",c:"Dairy & Eggs",r:"Cooking and baking",p:"nice-to-have",sub:"Olive oil"},{n:"Bread",q:"1 loaf",c:"Bakery",r:"Everyday staple",p:"essential"}],
+};
+
+const STORE_AISLES = {
+  "General":      {P:"Produce Section",D:"Dairy Aisle",M:"Meat Counter",G:"Dry Goods",C:"Canned Goods",F:"Frozen Section",B:"Bakery",V:"Drinks Aisle",S:"Snacks Aisle",X:"Condiments"},
+  "Whole Foods":  {P:"Section 1",D:"Section 2",M:"Butcher Counter",G:"Aisle 5",C:"Aisle 6",F:"Back of Store",B:"Bakery Counter",V:"Aisle 8",S:"Aisle 7",X:"Aisle 4"},
+  "Walmart":      {P:"D1",D:"D2",M:"D3",G:"A12",C:"A10",F:"D4",B:"D5",V:"A15",S:"A14",X:"A11"},
+  "Trader Joe's": {P:"Near Entrance",D:"Rear Wall",M:"Center",G:"Middle Aisles",C:"Middle Aisles",F:"Left Wall",B:"Near Entrance",V:"Right Wall",S:"Middle Aisles",X:"Middle Aisles"},
+  "Kroger":       {P:"Aisle 1",D:"Aisle 14",M:"Aisle 2",G:"Aisles 7-9",C:"Aisle 6",F:"Aisle 15",B:"Aisle 3",V:"Aisle 12",S:"Aisle 10",X:"Aisle 8"},
+  "Costco":       {P:"Section 1",D:"Rear Fridges",M:"Meat Section",G:"Center Aisles",C:"Center Aisles",F:"Freezer Aisle",B:"Bakery Section",V:"Aisle 9",S:"Aisle 7",X:"Aisle 6"},
+  "Aldi":         {P:"Near Entrance",D:"Rear Section",M:"Rear Section",G:"Center Aisles",C:"Center Aisles",F:"Back Aisle",B:"Near Entrance",V:"Center Aisles",S:"Center Aisles",X:"Center Aisles"},
+};
+
+const CAT_TO_AISLE_KEY = {
+  "Produce":"P","Dairy & Eggs":"D","Meat & Seafood":"M","Pantry & Dry Goods":"G",
+  "Canned & Jarred":"C","Frozen":"F","Bakery":"B","Beverages":"V","Snacks":"S","Condiments & Spices":"X","Other":"G"
+};
+
+function generateShopList(goal, store) {
+  const q = (goal || "general").toLowerCase();
+  const types = [];
+  if (/pasta|italian|spaghetti|bolognese/.test(q)) types.push("pasta");
+  if (/chicken/.test(q)) types.push("chicken");
+  if (/\bvegan\b/.test(q)) types.push("vegan");
+  else if (/vegetarian|no meat|meatless|plant.based/.test(q)) types.push("vegetarian");
+  if (/breakfast|morning|brunch/.test(q)) types.push("breakfast");
+  if (/salad|light|fresh/.test(q)) types.push("salad");
+  if (/soup|stew|chowder/.test(q)) types.push("soup");
+  if (/mexican|taco|burrito|tex.mex/.test(q)) types.push("mexican");
+  if (/asian|chinese|japanese|thai|stir.?fry|wok/.test(q)) types.push("asian");
+  if (/healthy|nutritious|clean|balanced|diet/.test(q)) types.push("healthy");
+  if (types.length === 0) types.push("general");
+
+  const aisles = STORE_AISLES[store] || STORE_AISLES["General"];
+  const seen = new Set(), list = [];
+  types.forEach(type => {
+    (SHOP_RULES[type] || []).forEach(item => {
+      if (seen.has(item.n) || pMatch(item.n, S.pantry)) return;
+      seen.add(item.n);
+      const ak = CAT_TO_AISLE_KEY[item.c] || "G";
+      list.push({ name:item.n, qty:item.q, category:item.c, reason:item.r,
+        substitution:item.sub||null, aisle:aisles[ak]||null,
+        recipe_needed_for:item.rf||null, priority:item.p||"nice-to-have" });
+    });
+  });
+  list.sort((a,b) => (a.priority==="essential"&&b.priority!=="essential" ? -1 : b.priority==="essential"&&a.priority!=="essential" ? 1 : 0));
+  const goalDesc = goal || "stocking up for the week";
+  return { list, summary: "Generated " + list.length + " items for: " + goalDesc + ". Skipped " + S.pantry.length + " items already in your pantry." };
+}
+
+function renderShop(main) {
+  function draw() {
+    main.innerHTML =
+      '<div class="tabs">' +
+        '<button class="tb ' + (S.shopSubTab==="gen"?"on":"") + '" id="shtg">&#x1F6D2; Generate List</button>' +
+        '<button class="tb ' + (S.shopSubTab==="saved"?"on":"") + '" id="shts">&#x1F4BE; Saved (' + S.savedLists.length + ')</button>' +
+      '</div><div id="shop-inner"></div>';
+    main.querySelector("#shtg").onclick = () => { S.shopSubTab="gen"; draw(); };
+    main.querySelector("#shts").onclick = () => { S.shopSubTab="saved"; draw(); };
+    if (S.shopSubTab === "gen") drawShopGen(main.querySelector("#shop-inner"), draw);
+    else drawShopSaved(main.querySelector("#shop-inner"));
+  }
+  draw();
+}
+
+function drawShopGen(el, redraw) {
+  el.innerHTML =
+    '<div class="card">' +
+      '<div class="ch"><div class="chi" style="background:var(--abg)">&#x1F6D2;</div>' +
+        '<div><div class="ct">Smart Shopping List</div>' +
+        '<div class="cs">Tailored to your pantry and goals &mdash; no account needed</div></div></div>' +
+      '<div class="cb">' +
+        '<label class="fl">What are you shopping for?</label>' +
+        '<textarea class="inp" id="shreq" placeholder="e.g. healthy dinners for 4 people this week&#x0A;e.g. pasta dishes and fresh salads&#x0A;e.g. vegetarian meals with lots of protein">' + S.shopReq + '</textarea>' +
+        '<div style="display:flex;gap:9px;align-items:center;margin:11px 0 14px;flex-wrap:wrap">' +
+          '<div style="flex:1"><label class="fl">Store</label>' +
+            '<select class="sel" id="shstore">' + Object.keys(STORE_AISLES).map(s => '<option'+(S.shopStore===s?" selected":"")+'>'+s+'</option>').join("") + '</select></div>' +
+          '<div style="font-size:12px;color:var(--tx3);margin-top:18px">Pantry: ' + S.pantry.length + ' items</div>' +
+        '</div>' +
+        '<button class="btn bp bfull" id="shgen">&#x2728; Generate My Shopping List</button>' +
+      '</div></div>' +
+    '<div id="shresult">' + (S.shopList ? buildShopHTML() : "") + '</div>';
+
+  el.querySelector("#shgen").onclick = () => {
+    S.shopReq   = el.querySelector("#shreq").value.trim();
+    S.shopStore = el.querySelector("#shstore").value;
+    S.shopList  = generateShopList(S.shopReq, S.shopStore);
+    S.shopChecked = {};
+    el.querySelector("#shresult").innerHTML = buildShopHTML();
+    wireShopList(el.querySelector("#shresult"), redraw);
+    toast("\u2713 Shopping list ready \u2014 " + S.shopList.list.length + " items!");
+  };
+  if (S.shopList) wireShopList(el.querySelector("#shresult"), redraw);
+}
+
+function buildShopHTML() {
+  if (!S.shopList) return "";
+  const total = S.shopList.list.length;
+  const chkd  = Object.values(S.shopChecked).filter(Boolean).length;
+  const pct   = total > 0 ? Math.round(chkd/total*100) : 0;
+
+  let grouped = {};
+  CATS.forEach(cat => {
+    const its = S.shopList.list.filter(i => i.category === cat);
+    if (its.length) grouped[cat] = its;
+  });
+  const unc = S.shopList.list.filter(i => !CATS.includes(i.category));
+  if (unc.length) grouped["Other"] = [...(grouped["Other"]||[]), ...unc];
+
+  let rows = "";
+  Object.entries(grouped).forEach(([cat, items]) => {
+    rows += '<div class="shopcat"><div class="slbl">' + cat + ' (' + items.length + ')</div>';
+    items.forEach(it => {
+      const done = S.shopChecked[it.name];
+      rows +=
+        '<div class="sitem ' + (done?"done":"") + '" data-si="' + encodeURIComponent(it.name) + '">' +
+          '<div class="schk">' + (done?"&#x2713;":"") + '</div>' +
+          '<div style="flex:1">' +
+            '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">' +
+              '<span class="snm">' + it.name + '</span>' +
+              '<span style="font-size:11px;color:var(--tx3)">' + it.qty + '</span>' +
+              (it.priority==="essential" ? '<span class="chip cr" style="font-size:10px;padding:1px 6px">Essential</span>' : "") +
+              (it.recipe_needed_for ? '<span class="chip cb2" style="font-size:10px;padding:1px 6px">' + it.recipe_needed_for + '</span>' : "") +
+              (it.aisle ? '<span style="background:var(--pbg);color:var(--p);border:1px solid var(--pb);border-radius:20px;padding:1px 7px;font-size:10px">' + it.aisle + '</span>' : "") +
+            '</div>' +
+            '<div style="font-size:11.5px;color:var(--tx3);margin-top:2px">' + (it.reason||"") + '</div>' +
+            (it.substitution ? '<div style="font-size:11.5px;color:var(--g);margin-top:2px">&#x1F4A1; Sub: ' + it.substitution + '</div>' : "") +
+          '</div>' +
+        '</div>';
+    });
+    rows += '</div>';
+  });
+
+  return '<div class="card">' +
+    '<div class="ch"><div style="flex:1">' +
+      '<div class="ct">Shopping List &middot; ' + total + ' items</div>' +
+      '<div class="cs">' + (S.shopList.summary||"") + '</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;align-items:center">' +
+      '<span style="font-size:12px;color:var(--tx3)">' + chkd + '/' + total + '</span>' +
+      '<button class="btn bg2 bsm" id="savelist">&#x1F4BE; Save</button>' +
+    '</div></div>' +
+    '<div class="cb">' +
+      '<div class="pbar"><div class="pfill" id="shopbar" style="width:' + pct + '%"></div></div>' +
+      rows +
+    '</div></div>';
+}
+
+function wireShopList(container, redraw) {
+  if (!container) return;
+  container.querySelectorAll(".sitem[data-si]").forEach(item => {
+    item.onclick = () => {
+      const name = decodeURIComponent(item.dataset.si);
+      S.shopChecked[name] = !S.shopChecked[name];
+      item.classList.toggle("done", S.shopChecked[name]);
+      const chk = item.querySelector(".schk");
+      chk.innerHTML      = S.shopChecked[name] ? "&#x2713;" : "";
+      chk.style.background   = S.shopChecked[name] ? "var(--g)" : "";
+      chk.style.borderColor  = S.shopChecked[name] ? "var(--g)" : "";
+      chk.style.color        = S.shopChecked[name] ? "#fff"     : "";
+      const bar = document.getElementById("shopbar");
+      if (bar && S.shopList) {
+        const t=S.shopList.list.length, c=Object.values(S.shopChecked).filter(Boolean).length;
+        bar.style.width = Math.round(c/t*100) + "%";
+      }
+    };
+  });
+  const sb = container.querySelector("#savelist");
+  if (sb) sb.onclick = () => {
+    S.savedLists.push({ name:S.shopReq||"Shopping List", date:new Date().toLocaleDateString(), list:JSON.parse(JSON.stringify(S.shopList)) });
+    toast("\u2713 List saved!"); S.shopSubTab="saved"; renderShop(document.getElementById("main"));
+  };
+}
+
+function drawShopSaved(el) {
+  if (!S.savedLists.length) {
+    el.innerHTML = '<div class="empty"><div class="eico">&#x1F4CB;</div><div class="etit">No saved lists yet</div><div style="font-size:13px;color:var(--tx3)">Generate a list and save it to see it here</div></div>';
+    return;
+  }
+  el.innerHTML = S.savedLists.map((sl, i) =>
+    '<div class="card" style="margin-bottom:14px">' +
+      '<div class="ch">' +
+        '<div><div class="ct">' + sl.name + '</div><div class="cs">' + sl.date + ' &middot; ' + sl.list.list.length + ' items</div></div>' +
+        '<button class="btn bd bsm" style="margin-left:auto" data-di="'+i+'">Delete</button>' +
+      '</div>' +
+      '<div class="cb">' +
+        CATS.map(cat => {
+          const its = sl.list.list.filter(x => x.category===cat);
+          if (!its.length) return "";
+          return '<div style="margin-bottom:11px"><div class="slbl">' + cat + '</div>' +
+            its.map(it => '<div style="font-size:13px;padding:3px 0;border-bottom:1px solid var(--bdr)">' + it.name + ' <span style="color:var(--tx3)">&mdash; ' + it.qty + '</span></div>').join("") +
+          '</div>';
+        }).join("") +
+      '</div>' +
+    '</div>'
+  ).join("");
+  el.querySelectorAll("[data-di]").forEach(btn => btn.onclick = () => { S.savedLists.splice(parseInt(btn.dataset.di),1); drawShopSaved(el); });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TAB 3 — RECIPES  (TheMealDB live + local database — no account needed)
+// ══════════════════════════════════════════════════════════════════════════════
+const QPROMPTS = [
+  "Gluten free chocolate cake","Caramel dessert","Healthy vegetarian dinner",
+  "Quick chicken pasta","High-protein breakfast no eggs","Vegan meal prep",
+  "Keto low carb dinner","Easy fish dinner","Comfort food cold night","Indian curry vegetarian",
+];
+
+async function mdbFetch(url) {
+  try {
+    const ctrl = new AbortController();
+    const tid  = setTimeout(() => ctrl.abort(), 8000);
+    const r    = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(tid);
+    const d = await r.json();
+    return d.meals || [];
+  } catch { return []; }
+}
+
+function mdbConvert(meal) {
+  const ings = [];
+  for (let i = 1; i <= 20; i++) {
+    const nm = (meal["strIngredient"+i]||"").trim();
+    const q  = (meal["strMeasure"+i]  ||"").trim();
+    if (nm) ings.push({ name:nm, qty:q, have:false });
+  }
+  const cat    = (meal.strCategory||"").toLowerCase();
+  const ingStr = ings.map(i=>i.name.toLowerCase()).join(" ");
+  const nl     = (meal.strMeal||"").toLowerCase();
+  const tags   = new Set();
+  if (["dessert"].includes(cat))   { tags.add("dessert"); tags.add("sweet"); }
+  if (cat==="breakfast")           tags.add("breakfast");
+  if (cat==="vegetarian")          tags.add("vegetarian");
+  if (cat==="chicken")           { tags.add("chicken"); tags.add("high-protein"); }
+  if (cat==="beef")              { tags.add("beef"); tags.add("high-protein"); }
+  if (cat==="seafood")           { tags.add("fish"); tags.add("high-protein"); }
+  if (cat==="pasta")             { tags.add("pasta"); tags.add("italian"); }
+  if (cat==="lamb")                tags.add("lamb");
+  const areaL  = (meal.strArea||"").toLowerCase();
+  const areaMap = {italian:"italian",french:"french",mexican:"mexican",indian:"indian",japanese:"asian",chinese:"asian",thai:"asian",greek:"mediterranean",spanish:"spanish",british:"british",american:"american",moroccan:"middle-eastern",turkish:"middle-eastern"};
+  if (areaMap[areaL]) tags.add(areaMap[areaL]);
+  if (!/\bflour\b|\bwheat\b|\bpasta\b|\bbread\b|\bsemolina\b|\bcouscous\b/.test(ingStr)) tags.add("gluten-free");
+  if (!/\bmilk\b|\bcream\b|\bbutter\b|\bcheese\b|\byoghu?rt\b/.test(ingStr)) tags.add("dairy-free");
+  if (/caramel|toffee|butterscotch/.test(nl+ingStr)) tags.add("caramel");
+  if (/chocolate|cocoa/.test(nl+ingStr))             tags.add("chocolate");
+  if (/\bcake\b/.test(nl))                           tags.add("cake");
+  if (/cookie|biscuit/.test(nl))                     tags.add("cookies");
+  if (/\bsoup\b/.test(nl))                           tags.add("soup");
+  if (/\bsalad\b/.test(nl))                          tags.add("salad");
+  if (/curry/.test(nl))                              tags.add("curry");
+  if (ings.length <= 8) { tags.add("quick"); tags.add("easy"); }
+  const catEmoji = {Dessert:"🍰",Breakfast:"🍳",Chicken:"🍗",Beef:"🥩",Pork:"🥓",Seafood:"🐟",Pasta:"🍝",Vegetarian:"🥗",Vegan:"🌱",Lamb:"🍖",Miscellaneous:"🍽️",Side:"🥙",Starter:"🥗"};
+  const steps = (meal.strInstructions||"")
+    .split(/\r?\n\r?\n|\n(?=[A-Z0-9])/)
+    .map(s => s.replace(/^STEP\s*\d+[.:)]\s*/i,"").trim())
+    .filter(s => s.length > 15).slice(0,10);
+  return {
+    id:"mdb_"+meal.idMeal, name:meal.strMeal,
+    emoji: catEmoji[meal.strCategory]||"🍽️",
+    time: ings.length<=8 ? "~25 min" : "~45 min",
+    servings:"4 servings",
+    difficulty: ings.length<=6?"Easy":ings.length<=12?"Medium":"Hard",
+    calories:"See recipe",
+    tags:[...tags],
+    description:[(meal.strArea||""),(meal.strCategory||"")].filter(Boolean).join(" \u00b7 "),
+    ingredients:ings,
+    steps: steps.length>=2 ? steps : [(meal.strInstructions||"").slice(0,600)],
+    tip: meal.strSource||null,
+    sourceUrl: meal.strSource||null,
+    thumbUrl: meal.strMealThumb||null,
+    source:"TheMealDB",
+  };
+}
+
+function scoreRecipe(r, query) {
+  const q = query.toLowerCase(), nl = (r.name||"").toLowerCase(), tags = r.tags||[];
+  const ingStr = (r.ingredients||[]).map(i=>(i.name||"").toLowerCase()).join(" ");
+  const all = nl+" "+tags.join(" ")+" "+ingStr;
+  let score = 0; const matched = {};
+  const signals = [
+    [/\bgluten.?free\b/,          "gluten-free", 20],
+    [/\bdairy.?free\b/,           "dairy-free",  18],
+    [/\bvegan\b/,                 "vegan",        22],
+    [/\bvegetarian\b|\bno meat\b/,"vegetarian",  18],
+    [/\bketo\b|\blow.?carb\b/,    "keto",         18],
+    [/\bhigh.?protein\b|\bprotein/,"high-protein",15],
+    [/\bchocolate\b|\bcocoa\b/,   "chocolate",   25],
+    [/\bcaramel\b|\btoffee\b/,    "caramel",      25],
+    [/\bdessert\b|\bsweet\b|\btreat\b|\bbaking\b/, "dessert", 22],
+    [/\bcake\b/,                  "cake",         30],
+    [/\bbrownie\b/,               "brownie",      30],
+    [/\bpasta\b|\bspaghetti\b/,   "pasta",        25],
+    [/\bpizza\b/,                 "pizza",        25],
+    [/\bcurry\b/,                 "curry",        25],
+    [/\bsoup\b/,                  "soup",         20],
+    [/\bsalad\b/,                 "salad",        20],
+    [/\bchicken\b/,               "chicken",      20],
+    [/\bbeef\b|\bsteak\b/,        "beef",         20],
+    [/\bfish\b|\bsalmon\b/,       "fish",         20],
+    [/\bbreakfast\b/,             "breakfast",    22],
+    [/\bquick\b|\bfast\b|\beasy\b/,"quick",         8],
+    [/\bhealthy\b|\blight\b/,     "healthy",       8],
+    [/\bfamily\b|\bkids\b/,       "family-friendly",8],
+    [/\bitalian\b/,               "italian",      15],
+    [/\bmexican\b|\btaco\b/,      "mexican",      15],
+    [/\basian\b|\bstir.?fry\b/,   "stir-fry",     15],
+    [/\bindian\b/,                "indian",       15],
+    [/\bfrench\b/,                "french",       15],
+  ];
+  signals.forEach(([pat, tag, w]) => {
+    if (pat.test(q)) {
+      const hit = tags.includes(tag) || all.includes(tag.replace(/-/g," ")) || nl.includes(tag.replace(/-/g," "));
+      if (hit) { score += nl.includes(tag.replace(/-/g," ")) ? w*2 : w; matched[tag]=true; }
+      else matched[tag]=false;
+    }
+  });
+  // Pantry match bonus
+  score += (r.ingredients||[]).filter(i => pMatch(i.name, S.pantry)).length * 2;
+  if (r.source==="TheMealDB") score += 3;
+  return { score, matched };
+}
+
+async function findRecipes(query) {
+  const results = new Map(), q = query.toLowerCase();
+  const foodWords = ["cake","brownie","cookies","cheesecake","tart","mousse","pudding","pie","tiramisu","crepe","pancakes","waffle","pizza","pasta","risotto","burger","tacos","curry","soup","salad","stew","chicken","beef","salmon","shrimp","lamb","pork","breakfast","stir fry","ramen","sushi","omelette","muffin","churros","chocolate","caramel","lemon","vanilla","strawberry","blueberry","apple","banana","coconut","mango","coffee","garlic","tomato","mushroom","spinach","avocado","feta","quinoa","lentil"];
+  const terms = [];
+  foodWords.forEach(w => { if (q.includes(w)) terms.push(w); });
+  if (!terms.length) {
+    // Extract meaningful words from the query
+    const words = q.split(/\s+/).filter(w => w.length > 3 && !["with","that","want","some","good","make","like","nice","quick","easy","fast","healthy","dinner","lunch","breakfast","recipe","recipes","dish","meal","food"].includes(w));
+    if (words.length) terms.push(words[0]);
+    else terms.push(q.slice(0,20));
+  }
+  // Live TheMealDB searches
+  for (const term of terms.slice(0,3)) {
+    (await mdbFetch(MDB + "/search.php?s=" + encodeURIComponent(term))).forEach(m => results.set(m.idMeal, m));
+  }
+  // For sweet/dessert queries — pull the full Dessert category
+  if (/dessert|sweet|treat|cake|caramel|toffee|chocolate|brownie|cookie|pudding|pie|fudge|cheesecake|mousse|tiramisu|tart|baking/.test(q)) {
+    const stubs = await mdbFetch(MDB + "/filter.php?c=Dessert");
+    await Promise.all(stubs.slice(0,18).map(async stub => {
+      if (!results.has(stub.idMeal)) {
+        const full = await mdbFetch(MDB + "/lookup.php?i=" + stub.idMeal);
+        if (full[0]) results.set(full[0].idMeal, full[0]);
+      }
+    }));
+  }
+  // Category lookup for mains
+  const catMap = {chicken:"Chicken",beef:"Beef",pork:"Pork",fish:"Seafood",salmon:"Seafood",shrimp:"Seafood",pasta:"Pasta",lamb:"Lamb",breakfast:"Breakfast",vegetarian:"Vegetarian",vegan:"Vegan"};
+  for (const term of terms) {
+    if (catMap[term] && results.size < 10) {
+      const stubs = await mdbFetch(MDB + "/filter.php?c=" + encodeURIComponent(catMap[term]));
+      await Promise.all(stubs.slice(0,10).map(async stub => {
+        if (!results.has(stub.idMeal)) {
+          const full = await mdbFetch(MDB + "/lookup.php?i=" + stub.idMeal);
+          if (full[0]) results.set(full[0].idMeal, full[0]);
+        }
+      }));
+    }
+  }
+
+  const webRecipes = [...results.values()].map(mdbConvert);
+
+  // Merge web + local (dedup by name)
+  const allCandidates = new Map();
+  [...webRecipes, ...RECIPE_DB].forEach(r => {
+    const k = (r.name||"").toLowerCase().trim();
+    if (!allCandidates.has(k)) allCandidates.set(k, r);
+  });
+
+  // Score and sort
+  const scored = [...allCandidates.values()].map(r => {
+    const { score, matched } = scoreRecipe(r, query);
+    return { ...r, _score:score, _matched:matched };
+  }).sort((a,b) => b._score - a._score);
+
+  // Always return results — mark pantry
+  return scored.slice(0,10).map(r => ({
+    ...r,
+    ingredients: (r.ingredients||[]).map(ing => ({ ...ing, have: pMatch(ing.name, S.pantry) }))
+  }));
+}
+
+function renderRecipes(main) {
+  function draw() {
+    main.innerHTML =
+      '<div class="tabs">' +
+        '<button class="tb ' + (S.recipeSubTab==="find"?"on":"") + '" id="rtf">&#x1F50D; Find Recipes</button>' +
+        '<button class="tb ' + (S.recipeSubTab==="fav"?"on":"")  + '" id="rtv">&#x2B50; Favorites (' + S.favorites.length + ')</button>' +
+      '</div><div id="rec-inner"></div>';
+    main.querySelector("#rtf").onclick = () => { S.recipeSubTab="find"; draw(); };
+    main.querySelector("#rtv").onclick = () => { S.recipeSubTab="fav";  draw(); };
+    if (S.recipeSubTab==="find") drawRecipeFind(main.querySelector("#rec-inner"), draw);
+    else                         drawRecipeFav (main.querySelector("#rec-inner"), draw);
+  }
+  draw();
+}
+
+function drawRecipeFind(el, redraw) {
+  el.innerHTML =
+    '<div class="card">' +
+      '<div class="ch"><div class="chi" style="background:var(--pbg)">&#x1F468;&#x200D;&#x1F373;</div>' +
+        '<div><div class="ct">Recipe Finder</div>' +
+        '<div class="cs">Live TheMealDB search + 20 local recipes &mdash; no account needed</div></div></div>' +
+      '<div class="cb">' +
+        '<label class="fl">What would you like to cook?</label>' +
+        '<textarea class="inp" id="rq" placeholder="Be as specific as you like:&#x0A;&bull; gluten free chocolate cake with caramel&#x0A;&bull; quick vegan dinner with chickpeas&#x0A;&bull; high-protein keto breakfast no eggs&#x0A;&bull; Italian vegetarian pasta dish">' + S.recipeQ + '</textarea>' +
+        '<div style="display:flex;gap:5px;flex-wrap:wrap;margin:11px 0 13px">' +
+          QPROMPTS.map(q => '<span class="chip cgr ck" data-qp="' + encodeURIComponent(q) + '">' + q + '</span>').join("") +
+        '</div>' +
+        '<button class="btn bp bfull" id="rfind">&#x1F50D; Find Recipes</button>' +
+      '</div></div>' +
+    '<div id="rsummary"></div>' +
+    '<div id="rresults"></div>';
+
+  el.querySelectorAll("[data-qp]").forEach(chip => chip.onclick = () => {
+    el.querySelector("#rq").value = decodeURIComponent(chip.dataset.qp);
+    S.recipeQ = el.querySelector("#rq").value;
+    el.querySelector("#rfind").click();
+  });
+
+  el.querySelector("#rfind").onclick = async () => {
+    const q = el.querySelector("#rq").value.trim();
+    if (!q) { toast("Type what you want to cook!"); return; }
+    S.recipeQ = q; S.recipeExpanded = null;
+    const btn = el.querySelector("#rfind");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spn"></span> Searching&hellip;';
+    el.querySelector("#rsummary").innerHTML = loading('Searching TheMealDB live + local recipes for &ldquo;' + q + '&rdquo;&hellip;');
+    el.querySelector("#rresults").innerHTML = "";
+    try {
+      S.recipes = await findRecipes(q);
+      el.querySelector("#rsummary").innerHTML =
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">' +
+          '<span style="font-family:var(--fd);font-weight:700;font-size:14.5px">' + S.recipes.length + ' recipes found</span>' +
+          '<span class="chip cb2" style="font-size:11px">&#x1F310; TheMealDB live</span>' +
+          '<span class="chip cgr" style="font-size:11px">&#x1F4E6; local database</span>' +
+          '<span class="chip cp"  style="font-size:11px">&#x1F3AF; ' + q.slice(0,40) + '</span>' +
+        '</div>';
+      drawRecipeResults(el.querySelector("#rresults"), redraw);
+      toast("Found " + S.recipes.length + " recipes!");
+    } catch(err) {
+      el.querySelector("#rsummary").innerHTML = '<div class="err">Search error: ' + err.message + '</div>';
+    }
+    btn.disabled = false; btn.textContent = "&#x1F50D; Find Recipes";
+  };
+  if (S.recipes.length) drawRecipeResults(el.querySelector("#rresults"), redraw);
+}
+
+function drawRecipeResults(el, redraw) {
+  if (!S.recipes.length) return;
+  el.innerHTML = '<div class="rgrid" id="rgrid"></div>';
+  const grid = el.querySelector("#rgrid");
+  S.recipes.forEach((r, i) => {
+    const have     = (r.ingredients||[]).filter(x=>x.have).length;
+    const total    = (r.ingredients||[]).length;
+    const pct      = total > 0 ? Math.round(have/total*100) : 0;
+    const isFav    = S.favorites.some(f=>f.name===r.name);
+    const expanded = S.recipeExpanded === i;
+    const matched  = r._matched || {};
+
+    // Match badges — show what the user asked for and whether this recipe has it
+    const matchBadges = Object.entries(matched).map(([k, hit]) =>
+      '<span class="chip ' + (hit?"cg":"ca") + '" style="font-size:10px;padding:1px 6px">' + (hit?"&#x2713;":"~") + " " + k + '</span>'
+    ).join("");
+
+    const niceTags = (r.tags||[]).filter(t => [
+      "vegetarian","vegan","gluten-free","dairy-free","keto","quick","easy","high-protein",
+      "healthy","dessert","sweet","caramel","chocolate","italian","mexican","asian","french",
+      "indian","thai","british","breakfast","cake","curry","soup","salad",
+    ].includes(t)).slice(0,4);
+
+    const ingHtml = (r.ingredients||[]).slice(0, expanded ? 9999 : 5).map(ing =>
+      '<div class="rrow">' +
+        '<div class="' + (ing.have?"hd":"nd") + '"></div>' +
+        '<span style="flex:1">' + (ing.name||"") + '</span>' +
+        '<span style="font-size:11px;color:var(--tx3)">' + (ing.qty||"") + '</span>' +
+        (!ing.have ? '<span class="chip ca" style="font-size:10px;padding:0 5px">Buy</span>' : "") +
+      '</div>'
+    ).join("");
+
+    const stepsHtml = expanded && r.steps
+      ? '<div class="rdvd"></div><div class="rsteps"><div class="slbl">Instructions</div>' +
+          r.steps.map((s,j) => '<div class="strow"><div class="stnum">'+(j+1)+'</div><div class="sttxt">'+s+'</div></div>').join("") +
+          (r.tip && !r.sourceUrl ? '<div class="rtip">&#x1F4A1; ' + r.tip + '</div>' : "") +
+          (r.sourceUrl ? '<a href="'+r.sourceUrl+'" target="_blank" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:12px;color:var(--b);text-decoration:none;background:var(--bbg);border:1px solid var(--bb);padding:6px 12px;border-radius:var(--rr)">&#x1F517; Full recipe on source website &nearr;</a>' : "") +
+        '</div>'
+      : "";
+
+    const card = document.createElement("div");
+    card.className = "rcard";
+    card.style.animation = "fin .3s ease";
+
+    card.innerHTML =
+      (r.thumbUrl ? '<img src="'+r.thumbUrl+'" class="rthumb" alt="'+r.name+'" loading="lazy" onerror="this.style.display=\'none\'"/>' : "") +
+      '<div class="rhdr">' +
+        '<div class="remi">' + (r.emoji||"🍽️") + '</div>' +
+        '<div style="flex:1">' +
+          '<div class="rname">' + r.name + '</div>' +
+          '<div class="rmeta">' +
+            '<span>&#x23F1; ' + (r.time||"—") + '</span>' +
+            '<span>&#x1F465; ' + (r.servings||"—") + '</span>' +
+            '<span>&#x1F525; ' + (r.calories||"—") + '</span>' +
+            '<span class="' + (r.source==="TheMealDB"?"srcw":"srcl") + '">' + (r.source==="TheMealDB"?"&#x1F310; web":"&#x1F4E6; local") + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<button class="fbtn ' + (isFav?"on":"") + '" data-fi="'+i+'">' + (isFav?"⭐":"☆") + '</button>' +
+      '</div>' +
+      (matchBadges ? '<div style="padding:0 15px 10px;display:flex;gap:4px;flex-wrap:wrap">' + matchBadges + '</div>' : "") +
+      '<div class="rtags">' +
+        '<span class="chip cgr" style="font-size:10.5px">' + (r.difficulty||"—") + '</span>' +
+        niceTags.map(t => '<span class="chip cg" style="font-size:10.5px">' + t + '</span>').join("") +
+      '</div>' +
+      (r.description ? '<div class="rdesc">' + r.description + '</div>' : "") +
+      '<div class="rdvd"></div>' +
+      '<div class="rings">' +
+        '<div style="font-size:12px;color:var(--tx3);margin-bottom:6px;display:flex;justify-content:space-between">' +
+          '<span>Ingredients (' + total + ')</span>' +
+          '<span style="color:' + (pct>70?"var(--g)":"var(--a)") + '">' + pct + '% in pantry</span>' +
+        '</div>' +
+        ingHtml +
+        ((r.ingredients||[]).length > 5
+          ? '<button class="btn bg2 bsm" style="margin-top:4px;font-size:12px" data-exp="'+i+'">' + (expanded ? "Show less &#x2191;" : "+" + ((r.ingredients||[]).length-5) + " more &#x2193;") + '</button>'
+          : "") +
+      '</div>' +
+      stepsHtml +
+      '<div class="rfoot">' +
+        '<div style="font-size:12px;color:var(--tx3);flex:1"><span style="color:var(--g);font-weight:600">' + have + '</span> / ' + total + ' on hand</div>' +
+        '<button class="btn bg2 bsm" data-view="'+i+'">' + (expanded ? "Collapse" : "View Recipe") + '</button>' +
+      '</div>';
+
+    card.querySelector("[data-fi]").onclick = e => {
+      e.stopPropagation();
+      const idx = S.favorites.findIndex(f => f.name===r.name);
+      if (idx >= 0) { S.favorites.splice(idx,1); toast("Removed from favorites"); }
+      else { S.favorites.push(r); toast('\u2B50 "' + r.name + '" saved!'); }
+      badges(); drawRecipeResults(el, redraw);
+    };
+    const expBtn = card.querySelector("[data-exp]");
+    if (expBtn) expBtn.onclick = e => { e.stopPropagation(); S.recipeExpanded = S.recipeExpanded===i?null:i; drawRecipeResults(el,redraw); };
+    card.querySelector("[data-view]").onclick = () => { S.recipeExpanded = S.recipeExpanded===i?null:i; drawRecipeResults(el,redraw); };
+    grid.appendChild(card);
+  });
+}
+
+function drawRecipeFav(el) {
+  if (!S.favorites.length) {
+    el.innerHTML = '<div class="empty"><div class="eico">&#x2B50;</div><div class="etit">No favorites yet</div><div style="font-size:13px;color:var(--tx3)">Star recipes in the finder to save them here</div></div>';
+    return;
+  }
+  el.innerHTML = S.favorites.map((r, i) =>
+    '<div class="fitem">' +
+      '<div style="font-size:24px">' + (r.emoji||"🍽️") + '</div>' +
+      '<div style="flex:1">' +
+        '<div class="fn">' + r.name + '</div>' +
+        '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px">' +
+          '<span class="chip cgr" style="font-size:11px">&#x23F1; ' + (r.time||"—") + '</span>' +
+          (r.source==="TheMealDB" ? '<span class="srcw">&#x1F310; web</span>' : "") +
+          (r.tags||[]).filter(t=>["vegetarian","vegan","gluten-free","dessert","sweet","caramel","chocolate","keto","quick","high-protein","healthy","cake","curry"].includes(t)).slice(0,3).map(t=>'<span class="chip cg" style="font-size:11px">'+t+'</span>').join("") +
+        '</div>' +
+      '</div>' +
+      '<button class="btn bd bsm" data-dfi="'+i+'">Remove</button>' +
+    '</div>'
+  ).join("");
+  el.querySelectorAll("[data-dfi]").forEach(btn => btn.onclick = () => { S.favorites.splice(parseInt(btn.dataset.dfi),1); badges(); drawRecipeFav(el); });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TAB 4 — MEAL PLANNER  (rule-based — no account needed)
+// ══════════════════════════════════════════════════════════════════════════════
+const MEAL_POOLS = {
+  balanced: {
+    breakfast: ["Scrambled Eggs","Overnight Oats","Greek Yogurt Parfait","Banana Pancakes","Avocado Toast","French Toast","Smoothie Bowl","Veggie Omelette"],
+    lunch:     ["Chicken Wrap","Caesar Salad","Greek Salad","Tomato Soup","Caprese Salad","Quinoa Buddha Bowl","Tuna Salad Sandwich","Grilled Cheese"],
+    dinner:    ["Spaghetti Bolognese","Chicken Stir Fry","Baked Lemon Salmon","Chicken Tikka Masala","Beef Tacos","Shakshuka","Pasta Carbonara","One-Pan Chicken & Veg"],
+  },
+  vegetarian: {
+    breakfast: ["Scrambled Eggs","Overnight Oats","Greek Yogurt Parfait","Avocado Toast","Veggie Omelette","Banana Pancakes"],
+    lunch:     ["Greek Salad","Caprese Salad","Tomato Soup","Quinoa Buddha Bowl","Grilled Cheese","Roasted Veg Wrap"],
+    dinner:    ["Vegetable Chickpea Curry","Shakshuka","Mushroom Risotto","Pesto Pasta","Black Bean Tacos","Eggplant Parmesan","Red Lentil Soup","Vegetarian Chili"],
+  },
+  vegan: {
+    breakfast: ["Overnight Oats","Avocado Toast","Smoothie Bowl","Peanut Butter Banana Toast"],
+    lunch:     ["Greek Salad (no feta)","Tomato Soup","Quinoa Buddha Bowl","Roasted Veg Wrap"],
+    dinner:    ["Vegetable Chickpea Curry","Red Lentil Soup","Black Bean Tacos","Sweet Potato Buddha Bowl","Vegetarian Chili","Tofu Stir Fry"],
+  },
+  keto: {
+    breakfast: ["Scrambled Eggs","Veggie Omelette","Bacon & Eggs","Smoked Salmon & Cream Cheese"],
+    lunch:     ["Caesar Salad","Greek Salad","Cobb Salad","Chicken Avocado Salad"],
+    dinner:    ["Baked Lemon Salmon","Chicken Stir Fry","Grilled Steak & Asparagus","One-Pan Chicken & Veg","Shakshuka","Zucchini Noodles Bolognese"],
+  },
+  mediterranean: {
+    breakfast: ["Greek Yogurt Parfait","Avocado Toast","Smoothie Bowl","Overnight Oats"],
+    lunch:     ["Greek Salad","Hummus & Veggie Wrap","Caprese Salad","Tuna & White Bean Salad"],
+    dinner:    ["Baked Lemon Salmon","Chicken Tikka Masala","Shakshuka","Eggplant Parmesan","Chickpea Stew","Lamb Kebabs with Tzatziki"],
+  },
+  "high-protein": {
+    breakfast: ["Scrambled Eggs","Greek Yogurt Parfait","Veggie Omelette","Cottage Cheese & Fruit"],
+    lunch:     ["Chicken Wrap","Tuna Salad","Quinoa Buddha Bowl","Grilled Chicken Salad"],
+    dinner:    ["Baked Lemon Salmon","Chicken Stir Fry","Chicken Tikka Masala","Beef Tacos","Grilled Steak","Turkey Meatballs & Pasta"],
+  },
+};
+
+function buildMealPlan(prefs) {
+  const pool = MEAL_POOLS[prefs.diet] || MEAL_POOLS.balanced;
+  const used = new Set();
+  const plan = {};
+
+  function pick(arr) {
+    const avail = arr.filter(m => !used.has(m));
+    const src   = avail.length > 0 ? avail : arr;
+    const m     = src[Math.floor(Math.random() * src.length)];
+    used.add(m);
+    return m;
+  }
+
+  DAYS.forEach(day => {
+    plan[day] = {
+      Breakfast: pick(pool.breakfast),
+      Lunch:     pick(pool.lunch),
+      Dinner:    pick(pool.dinner),
+    };
+  });
+
+  // Grocery summary — items needed that aren't in pantry
+  const allMealNames = DAYS.flatMap(d => Object.values(plan[d]));
+  const grocMap = new Map();
+  allMealNames.forEach(mealName => {
+    const r = RECIPE_DB.find(x => x.name === mealName);
+    if (r) r.ingredients.forEach(i => { if (!pMatch(i.name, S.pantry) && !grocMap.has(i.name)) grocMap.set(i.name, true); });
+  });
+
+  const dietLabels = { balanced:"balanced", vegetarian:"vegetarian", vegan:"fully plant-based", keto:"keto/low-carb", mediterranean:"Mediterranean-style", "high-protein":"high-protein" };
+
+  return {
+    plan,
+    grocery_summary: [...grocMap.keys()].slice(0, 20),
+    nutrition_note:  "Your " + (dietLabels[prefs.diet]||prefs.diet) + " plan for " + prefs.people + " people.",
+    tips: [
+      "Prep your proteins on Sunday — batch-cook chicken or hard-boil eggs to save time on weekdays.",
+      "Double dinner quantities to get ready-made lunches the next day with zero extra effort.",
+      "Keep your pantry stocked with the basics: olive oil, garlic, onions, canned tomatoes, salt and pepper.",
+      "Check for expiring items in your pantry and plan meals around those first to reduce waste.",
+    ],
+  };
+}
+
+function renderPlan(main) {
+  const p = S.mealPrefs;
+  main.innerHTML =
+    '<div class="card">' +
+      '<div class="ch"><div class="chi" style="background:var(--pbg)">&#x1F4C5;</div>' +
+        '<div><div class="ct">Weekly Meal Planner</div>' +
+        '<div class="cs">Generates a smart 7-day plan &mdash; no account needed</div></div></div>' +
+      '<div class="cb">' +
+        '<div class="two">' +
+          '<div>' +
+            '<label class="fl">Diet preference</label>' +
+            '<select class="sel" id="pdiet" style="margin-bottom:13px">' + ["balanced","vegetarian","vegan","keto","mediterranean","high-protein"].map(d=>'<option'+(p.diet===d?" selected":"")+'>'+d+'</option>').join("") + '</select>' +
+            '<label class="fl">Number of people</label>' +
+            '<select class="sel" id="pppl" style="margin-bottom:13px">' + ["1","2","3","4","5","6+"].map(n=>'<option'+(p.people===n?" selected":"")+'>'+n+'</option>').join("") + '</select>' +
+          '</div>' +
+          '<div>' +
+            '<label class="fl">Budget</label>' +
+            '<select class="sel" id="pbud" style="margin-bottom:13px">' + ["tight","moderate","flexible","premium"].map(b=>'<option'+(p.budget===b?" selected":"")+'>'+b+'</option>').join("") + '</select>' +
+            '<label class="fl">Avoid / allergies</label>' +
+            '<input class="inp" id="pavoid" placeholder="e.g. nuts, shellfish, gluten&hellip;" value="' + p.avoid + '"/>' +
+          '</div>' +
+        '</div>' +
+        '<div class="dvd"></div>' +
+        '<button class="btn bp bfull" id="genplan">&#x1F5D3;&#xFE0F; Generate My 7-Day Plan</button>' +
+      '</div></div>' +
+    '<div id="pload"></div>' +
+    '<div id="presult">' + (S.mealPlan ? buildPlanHTML() : "") + '</div>';
+
+  main.querySelector("#genplan").onclick = () => {
+    S.mealPrefs = {
+      diet:   main.querySelector("#pdiet").value,
+      people: main.querySelector("#pppl").value,
+      budget: main.querySelector("#pbud").value,
+      avoid:  main.querySelector("#pavoid").value || "nothing",
+    };
+    const btn = main.querySelector("#genplan");
+    btn.disabled = true; btn.innerHTML = '<span class="spn"></span> Planning your week&hellip;';
+    main.querySelector("#pload").innerHTML = loading("Building a delicious and varied week for you&hellip;");
+    main.querySelector("#presult").innerHTML = "";
+    setTimeout(() => {
+      S.mealPlan = buildMealPlan(S.mealPrefs);
+      main.querySelector("#pload").innerHTML = "";
+      main.querySelector("#presult").innerHTML = buildPlanHTML();
+      toast("\u2713 7-day meal plan ready!");
+      btn.disabled = false; btn.textContent = "&#x1F5D3;&#xFE0F; Regenerate Plan";
+    }, 700);
+  };
+}
+
+function buildPlanHTML() {
+  const p = S.mealPlan;
+  return '<div class="card">' +
+    '<div class="ch"><div class="chi" style="background:var(--gbg)">&#x1F5D3;&#xFE0F;</div>' +
+      '<div><div class="ct">Your Week Ahead</div><div class="cs">' + (p.nutrition_note||"") + '</div></div></div>' +
+    '<div class="cb" style="overflow-x:auto">' +
+      '<div class="wgrid">' +
+        DAYS.map(day =>
+          '<div>' +
+            '<div class="dlbl">' + day + '</div>' +
+            MOD.map(meal =>
+              '<div class="mslot">' +
+                '<div class="mslab">' + meal + '</div>' +
+                (p.plan[day]&&p.plan[day][meal]
+                  ? '<div class="msname">' + p.plan[day][meal] + '</div>'
+                  : '<div style="font-size:10px;color:var(--tx3);font-style:italic">&mdash;</div>') +
+              '</div>'
+            ).join("") +
+          '</div>'
+        ).join("") +
+      '</div>' +
+    '</div></div>' +
+    '<div class="two">' +
+      '<div class="card">' +
+        '<div class="ch"><div class="chi" style="background:var(--abg)">&#x1F6CD;&#xFE0F;</div>' +
+          '<div><div class="ct">Items to Buy</div><div class="cs">Not currently in your pantry</div></div></div>' +
+        '<div class="cb">' +
+          (p.grocery_summary.length === 0
+            ? '<div style="font-size:13px;color:var(--g)">&#x2713; Your pantry has everything for this plan!</div>'
+            : p.grocery_summary.map(it =>
+                '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:13px">' +
+                  '<span style="width:6px;height:6px;border-radius:50%;background:var(--g2);flex-shrink:0;display:inline-block"></span>' + it +
+                '</div>'
+              ).join("")) +
+        '</div></div>' +
+      '<div class="card">' +
+        '<div class="ch"><div class="chi" style="background:var(--bbg)">&#x1F4A1;</div>' +
+          '<div><div class="ct">Chef Tips</div><div class="cs">Make your week easier</div></div></div>' +
+        '<div class="cb">' +
+          p.tips.map((t, i) =>
+            '<div style="padding:9px 12px;background:var(--s2);border-radius:var(--rr);margin-bottom:9px;font-size:13px;color:var(--tx2);line-height:1.55">' +
+              '<span style="font-family:var(--fd);font-weight:700;color:var(--g);margin-right:6px">' + (i+1) + '.</span>' + t +
+            '</div>'
+          ).join("") +
+        '</div></div>' +
+    '</div>';
+}
+
+// ── LOCAL RECIPE DATABASE ─────────────────────────────────────────────────────
+const RECIPE_DB = [
+  {id:1, name:"Scrambled Eggs",emoji:"🥚",time:"10 min",servings:"2",difficulty:"Easy",calories:"~280",
+   tags:["breakfast","quick","vegetarian","high-protein","gluten-free"],
+   description:"Silky, creamy scrambled eggs — the perfect quick breakfast.",
+   ingredients:[{name:"Eggs",qty:"4"},{name:"Butter",qty:"1 tbsp"},{name:"Milk",qty:"2 tbsp"},{name:"Salt",qty:"pinch"},{name:"Black Pepper",qty:"pinch"}],
+   steps:["Whisk eggs with milk, salt and pepper until combined.","Melt butter in a pan over low heat.","Pour in eggs and fold gently with a spatula until just set — remove while still slightly glossy."],
+   tip:"Low heat and patience gives you silky curds. High heat gives you rubber.",source:"local"},
+
+  {id:2, name:"Avocado Toast",emoji:"🥑",time:"10 min",servings:"2",difficulty:"Easy",calories:"~320",
+   tags:["breakfast","quick","vegetarian","vegan","healthy"],
+   description:"Creamy avocado on crunchy toast — endlessly customisable.",
+   ingredients:[{name:"Bread",qty:"4 slices"},{name:"Avocado",qty:"2 ripe"},{name:"Lemon",qty:"1"},{name:"Red Pepper Flakes",qty:"pinch"},{name:"Salt",qty:"to taste"}],
+   steps:["Toast the bread until golden and crisp.","Halve avocados, remove stones and scoop flesh into a bowl.","Mash with lemon juice and salt to your preferred texture.","Spread on toast and finish with red pepper flakes."],
+   tip:"Add a poached egg or smoked salmon for a protein boost.",source:"local"},
+
+  {id:3, name:"Spaghetti Bolognese",emoji:"🍝",time:"45 min",servings:"4",difficulty:"Medium",calories:"~550",
+   tags:["dinner","italian","comfort","family","pasta","beef"],
+   description:"Rich, slow-cooked beef ragu over al-dente spaghetti.",
+   ingredients:[{name:"Spaghetti",qty:"400g"},{name:"Ground Beef",qty:"500g"},{name:"Canned Tomatoes",qty:"2 cans"},{name:"Onion",qty:"1 large"},{name:"Garlic",qty:"4 cloves"},{name:"Olive Oil",qty:"2 tbsp"},{name:"Tomato Paste",qty:"2 tbsp"},{name:"Parmesan Cheese",qty:"to serve"}],
+   steps:["Finely dice onion and mince garlic. Sauté in olive oil 5 min until soft.","Add beef, break up and cook until browned all over.","Stir in tomato paste, then add canned tomatoes. Season well.","Simmer on low heat 25-30 min, stirring occasionally.","Cook spaghetti per packet. Drain, reserving a cup of pasta water.","Toss pasta in the sauce, adding pasta water to loosen if needed. Serve with parmesan."],
+   tip:"The longer you simmer, the deeper the flavour — 30 min minimum, 2 hours if you have time.",source:"local"},
+
+  {id:4, name:"Chicken Stir Fry",emoji:"🥦",time:"25 min",servings:"3",difficulty:"Easy",calories:"~420",
+   tags:["dinner","asian","quick","healthy","high-protein","chicken","gluten-free"],
+   description:"Tender chicken and crisp vegetables in a savoury sauce over rice.",
+   ingredients:[{name:"Chicken Breast",qty:"2 large"},{name:"Broccoli",qty:"2 cups florets"},{name:"Bell Peppers",qty:"2"},{name:"Garlic",qty:"3 cloves"},{name:"Soy Sauce",qty:"3 tbsp"},{name:"Sesame Oil",qty:"1 tsp"},{name:"Brown Rice",qty:"2 cups cooked"},{name:"Olive Oil",qty:"2 tbsp"}],
+   steps:["Slice chicken into thin strips. Season with salt and pepper.","Heat oil in a wok or large pan over high heat. Stir-fry chicken 4-5 min. Remove.","Stir-fry broccoli and peppers 3 min until tender-crisp.","Add garlic for 30 seconds, then return chicken to pan.","Add soy sauce and sesame oil, toss everything together. Serve over rice."],
+   tip:"High heat, constant motion, and not overcrowding the pan — that's all stir-fry is.",source:"local"},
+
+  {id:5, name:"Greek Salad",emoji:"🫒",time:"10 min",servings:"2",difficulty:"Easy",calories:"~280",
+   tags:["lunch","vegetarian","salad","healthy","gluten-free","quick","mediterranean"],
+   description:"Chunky vegetables, salty feta and olives dressed in olive oil.",
+   ingredients:[{name:"Cucumber",qty:"1 large"},{name:"Tomatoes",qty:"3 large"},{name:"Red Onion",qty:"1/2"},{name:"Feta Cheese",qty:"100g"},{name:"Kalamata Olives",qty:"1/2 cup"},{name:"Olive Oil",qty:"3 tbsp"},{name:"Lemon",qty:"1/2"},{name:"Dried Oregano",qty:"1 tsp"}],
+   steps:["Chop cucumber, tomatoes and red onion into chunky pieces.","Combine in a large bowl with olives.","Crumble feta over the top — don't mix it in yet.","Drizzle with olive oil, squeeze over lemon juice, scatter oregano. Toss gently."],
+   tip:"Use the best quality olive oil you have — it makes all the difference here.",source:"local"},
+
+  {id:6, name:"Vegetable Chickpea Curry",emoji:"🥘",time:"30 min",servings:"4",difficulty:"Easy",calories:"~380",
+   tags:["dinner","vegetarian","vegan","indian","healthy","comfort","high-protein","gluten-free"],
+   description:"Fragrant spiced chickpeas simmered in creamy coconut milk.",
+   ingredients:[{name:"Chickpeas",qty:"2 cans, drained"},{name:"Spinach",qty:"3 cups"},{name:"Coconut Milk",qty:"1 can"},{name:"Canned Tomatoes",qty:"1 can"},{name:"Onion",qty:"1"},{name:"Garlic",qty:"4 cloves"},{name:"Curry Powder",qty:"2 tbsp"},{name:"Cumin",qty:"1 tsp"},{name:"Brown Rice",qty:"2 cups cooked"}],
+   steps:["Finely dice onion and mince garlic. Fry in oil over medium heat 5 min.","Add curry powder and cumin, stir 1 min until fragrant.","Add canned tomatoes and coconut milk. Stir well.","Add chickpeas. Simmer 15 min until sauce thickens.","Stir in spinach until wilted. Season well. Serve over rice."],
+   tip:"This tastes even better the next day — make a big batch.",source:"local"},
+
+  {id:7, name:"Salted Caramel Brownies",emoji:"🍫",time:"45 min",servings:"16 squares",difficulty:"Medium",calories:"~280",
+   tags:["dessert","sweet","caramel","chocolate","baking","treat","vegetarian"],
+   description:"Fudgy dark chocolate brownies swirled with homemade salted caramel.",
+   ingredients:[{name:"Dark Chocolate",qty:"200g"},{name:"Butter",qty:"150g"},{name:"Sugar",qty:"200g"},{name:"Eggs",qty:"3 large"},{name:"Flour",qty:"80g"},{name:"Caramel Sauce",qty:"1/2 cup"},{name:"Sea Salt Flakes",qty:"1 tsp"},{name:"Cocoa Powder",qty:"2 tbsp"}],
+   steps:["Preheat oven 180°C/350°F. Line a 20cm square tin.","Melt chocolate and butter together. Cool slightly.","Whisk sugar and eggs until pale and thick. Fold in chocolate mixture.","Sift in flour and cocoa, fold gently.","Pour half the batter in tin, drizzle half the caramel. Add remaining batter and swirl remaining caramel through.","Scatter sea salt flakes over the top.","Bake 22-25 min — edges set but centre still has a wobble."],
+   tip:"The wobble in the centre is exactly what you want. It firms to a perfect fudgy texture as it cools.",source:"local"},
+
+  {id:8, name:"Caramel Sauce",emoji:"🍯",time:"15 min",servings:"1 cup",difficulty:"Easy",calories:"~90 per 2 tbsp",
+   tags:["dessert","sweet","caramel","sauce","treat","vegetarian","quick","gluten-free"],
+   description:"Silky, buttery caramel sauce ready in 15 minutes.",
+   ingredients:[{name:"Sugar",qty:"1 cup / 200g"},{name:"Butter",qty:"90g, cubed"},{name:"Heavy Cream",qty:"1/2 cup"},{name:"Sea Salt",qty:"1/2 tsp"},{name:"Vanilla Extract",qty:"1 tsp"}],
+   steps:["Heat sugar in a heavy-bottomed pan over medium heat, stirring constantly with a heatproof spatula.","It will clump then melt into a golden amber liquid — keep stirring.","Once deep amber, add butter all at once (it will bubble violently). Stir until melted, about 2 min.","Slowly pour in cream while stirring. Boil 1 minute.","Remove from heat. Stir in salt and vanilla. Cool in a jar — it thickens as it cools."],
+   tip:"Do NOT step away — caramel goes from perfect to burnt in seconds.",source:"local"},
+
+  {id:9, name:"Chocolate Chip Cookies",emoji:"🍪",time:"25 min",servings:"24 cookies",difficulty:"Easy",calories:"~180 each",
+   tags:["dessert","sweet","chocolate","cookies","baking","treat","comfort","family","vegetarian"],
+   description:"Crispy edges, soft chewy centres, loaded with melty chocolate chips.",
+   ingredients:[{name:"Butter",qty:"225g, softened"},{name:"Sugar",qty:"100g"},{name:"Brown Sugar",qty:"200g, packed"},{name:"Eggs",qty:"2 large"},{name:"Vanilla Extract",qty:"2 tsp"},{name:"Flour",qty:"280g"},{name:"Baking Soda",qty:"1 tsp"},{name:"Salt",qty:"1 tsp"},{name:"Chocolate Chips",qty:"340g"}],
+   steps:["Preheat oven 190°C/375°F. Line two baking sheets.","Beat butter with both sugars until light and fluffy.","Add eggs one at a time, beating well. Mix in vanilla.","Mix in flour, baking soda and salt. Fold in chocolate chips.","Scoop rounded tablespoons onto sheets, spacing 5cm apart.","Bake 9-11 min until golden at edges but soft in centre.","Cool on tray 5 min before transferring."],
+   tip:"Chill the dough for 30 min before baking for thicker, chewier, better-flavoured cookies.",source:"local"},
+
+  {id:10, name:"Lemon Drizzle Cake",emoji:"🍋",time:"50 min",servings:"10 slices",difficulty:"Easy",calories:"~310",
+   tags:["dessert","sweet","cake","lemon","baking","treat","family","vegetarian"],
+   description:"A wonderfully moist lemon sponge soaked with a tangy lemon syrup.",
+   ingredients:[{name:"Butter",qty:"225g, softened"},{name:"Sugar",qty:"225g"},{name:"Eggs",qty:"4 large"},{name:"Self-Raising Flour",qty:"225g"},{name:"Lemon",qty:"2 (zest and juice)"},{name:"Milk",qty:"2 tbsp"},{name:"Powdered Sugar",qty:"100g"}],
+   steps:["Preheat oven 180°C/350°F. Grease a 900g loaf tin.","Beat butter and sugar until very pale and fluffy — at least 5 min.","Add eggs one at a time with a spoonful of flour to prevent curdling.","Fold in remaining flour, lemon zest and milk.","Bake 45-50 min until a skewer comes out clean.","While still hot, poke all over with a skewer.","Mix lemon juice with powdered sugar and pour over the hot cake."],
+   tip:"Pouring the drizzle over a hot cake means it soaks in and creates a beautiful crunchy crust.",source:"local"},
+
+  {id:11, name:"Banana Caramel Tart",emoji:"🍌",time:"35 min + 1hr chill",servings:"8",difficulty:"Easy",calories:"~350",
+   tags:["dessert","sweet","caramel","banana","tart","treat","vegetarian","no-bake"],
+   description:"Banoffee-style tart with buttery base, caramel, banana and whipped cream.",
+   ingredients:[{name:"Digestive Biscuits",qty:"200g"},{name:"Butter",qty:"80g, melted"},{name:"Caramel Sauce",qty:"1 cup (or 1 can dulce de leche)"},{name:"Bananas",qty:"3 ripe"},{name:"Heavy Cream",qty:"300ml"},{name:"Powdered Sugar",qty:"2 tbsp"},{name:"Dark Chocolate",qty:"20g, to grate"}],
+   steps:["Crush biscuits to fine crumbs. Mix with melted butter.","Press firmly into the base of a 23cm loose-bottomed tin. Chill 20 min.","Spread caramel evenly over the chilled base.","Slice bananas and layer over the caramel.","Whip cream with powdered sugar to soft peaks. Spoon generously over bananas.","Grate dark chocolate over the top. Chill 1 hr before serving."],
+   tip:"Slice bananas just before assembling — they brown quickly if prepped too early.",source:"local"},
+
+  {id:12, name:"Chocolate Mousse",emoji:"🍫",time:"20 min + 2hr chill",servings:"4",difficulty:"Medium",calories:"~320",
+   tags:["dessert","sweet","chocolate","mousse","elegant","no-bake","treat","vegetarian","gluten-free"],
+   description:"Intensely chocolatey, impossibly airy mousse — just four ingredients.",
+   ingredients:[{name:"Dark Chocolate",qty:"200g (70%)"},{name:"Eggs",qty:"4, separated"},{name:"Sugar",qty:"50g"},{name:"Heavy Cream",qty:"100ml"}],
+   steps:["Melt chocolate over a bain-marie. Cool slightly.","Whisk egg yolks into the chocolate one at a time.","Whip cream to soft peaks. Fold into chocolate mixture.","Whisk egg whites to soft peaks, add sugar, whisk to stiff peaks.","Fold egg whites into chocolate in three gentle stages — don't overwork.","Divide into glasses. Chill at least 2 hours."],
+   tip:"Folding gently is the key — you're preserving all the air that makes it light.",source:"local"},
+
+  {id:13, name:"Shakshuka",emoji:"🍳",time:"25 min",servings:"3",difficulty:"Easy",calories:"~310",
+   tags:["dinner","breakfast","vegetarian","mediterranean","healthy","quick","comfort","gluten-free"],
+   description:"Eggs poached directly in a richly spiced tomato and pepper sauce.",
+   ingredients:[{name:"Eggs",qty:"6"},{name:"Canned Tomatoes",qty:"1 can"},{name:"Bell Peppers",qty:"2"},{name:"Onion",qty:"1"},{name:"Garlic",qty:"4 cloves"},{name:"Cumin",qty:"1 tsp"},{name:"Smoked Paprika",qty:"1.5 tsp"},{name:"Olive Oil",qty:"2 tbsp"},{name:"Feta Cheese",qty:"60g, crumbled"}],
+   steps:["Dice onion and peppers. Sauté in olive oil over medium heat 6 min.","Add minced garlic, cumin and paprika. Cook 1 min until fragrant.","Pour in canned tomatoes. Simmer 10 min, season well.","Use a spoon to make 6 wells in the sauce. Crack an egg into each.","Cover and cook 5-7 min — whites set, yolks still runny.","Top with crumbled feta. Serve straight from the pan with crusty bread."],
+   tip:"Don't overcook the eggs. Runny yolks breaking into the spiced sauce is half the pleasure.",source:"local"},
+
+  {id:14, name:"Overnight Oats",emoji:"🥣",time:"5 min + overnight",servings:"2",difficulty:"Easy",calories:"~380",
+   tags:["breakfast","vegetarian","healthy","meal-prep","quick","gluten-free"],
+   description:"Prep the night before for a creamy, ready-to-eat morning breakfast.",
+   ingredients:[{name:"Rolled Oats",qty:"1 cup"},{name:"Milk",qty:"1 cup"},{name:"Greek Yogurt",qty:"1/2 cup"},{name:"Banana",qty:"1, sliced"},{name:"Honey",qty:"1 tbsp"},{name:"Cinnamon",qty:"1/2 tsp"},{name:"Chia Seeds",qty:"1 tbsp (optional)"}],
+   steps:["Combine oats, milk, yogurt, honey and cinnamon in a jar or container.","Stir well to combine. Seal and refrigerate overnight.","In the morning, stir — add a splash more milk if too thick.","Top with sliced banana and anything else you like."],
+   tip:"Make 5 jars on Sunday night and you have breakfast sorted for the whole week.",source:"local"},
+
+  {id:15, name:"Tiramisu",emoji:"☕",time:"30 min + 4hr chill",servings:"8",difficulty:"Medium",calories:"~430",
+   tags:["dessert","sweet","coffee","italian","no-bake","elegant","treat","vegetarian"],
+   description:"Coffee-soaked ladyfingers layered with mascarpone cream — Italy's finest.",
+   ingredients:[{name:"Mascarpone",qty:"500g"},{name:"Eggs",qty:"4, separated"},{name:"Sugar",qty:"100g"},{name:"Ladyfingers",qty:"200g (savoiardi)"},{name:"Strong Espresso",qty:"300ml, cooled"},{name:"Cocoa Powder",qty:"3 tbsp, for dusting"}],
+   steps:["Whisk egg yolks and sugar until pale and thick. Beat in mascarpone until smooth.","In a separate clean bowl, whisk egg whites to stiff peaks.","Fold egg whites into mascarpone mixture in two gentle stages.","Dip each ladyfinger in espresso for just 1-2 seconds (no longer!).","Lay a layer of dipped ladyfingers in a 20x30cm dish.","Spread half the mascarpone cream over. Repeat layers.","Dust generously with cocoa powder. Chill 4+ hours."],
+   tip:"1-2 second dip only — if the ladyfingers soak too long, the whole thing becomes a soggy mess.",source:"local"},
+
+  {id:16, name:"Red Lentil Soup",emoji:"🍲",time:"30 min",servings:"4",difficulty:"Easy",calories:"~290",
+   tags:["lunch","dinner","vegan","vegetarian","healthy","soup","comfort","high-protein","gluten-free"],
+   description:"Warming, deeply spiced lentil soup that comes together in under 30 minutes.",
+   ingredients:[{name:"Red Lentils",qty:"1 cup, rinsed"},{name:"Onion",qty:"1"},{name:"Garlic",qty:"3 cloves"},{name:"Carrot",qty:"2"},{name:"Canned Tomatoes",qty:"1 can"},{name:"Olive Oil",qty:"2 tbsp"},{name:"Cumin",qty:"1 tsp"},{name:"Paprika",qty:"1 tsp"},{name:"Chicken Broth",qty:"4 cups"}],
+   steps:["Dice onion and carrot. Sauté in olive oil 5 min until soft.","Add garlic, cumin and paprika. Stir 1 min.","Add lentils, canned tomatoes and broth. Bring to a boil.","Reduce heat and simmer 20 min until lentils are completely soft.","Blend about half the soup for a creamy-chunky texture. Season well."],
+   tip:"A squeeze of lemon juice at the end brightens the whole bowl.",source:"local"},
+
+  {id:17, name:"Black Bean Tacos",emoji:"🌮",time:"15 min",servings:"3",difficulty:"Easy",calories:"~390",
+   tags:["dinner","mexican","vegetarian","vegan","quick","healthy","family"],
+   description:"Speedy, spiced black bean tacos with fresh avocado.",
+   ingredients:[{name:"Black Beans",qty:"2 cans, drained"},{name:"Tortillas",qty:"6 small"},{name:"Avocado",qty:"2"},{name:"Lime",qty:"2"},{name:"Cilantro",qty:"handful"},{name:"Garlic",qty:"2 cloves"},{name:"Cumin",qty:"1 tsp"},{name:"Smoked Paprika",qty:"1 tsp"}],
+   steps:["Heat oil in a pan. Add garlic, cumin and smoked paprika. Stir 30 sec.","Add drained beans. Cook 5 min, lightly mashing some for texture. Season.","Mash avocado with lime juice and a pinch of salt.","Warm tortillas in a dry pan 30 sec each side.","Fill tortillas with beans and top with avocado and chopped cilantro."],
+   tip:"A dollop of Greek yogurt works perfectly instead of sour cream.",source:"local"},
+
+  {id:18, name:"Sweet Potato Buddha Bowl",emoji:"🍠",time:"35 min",servings:"2",difficulty:"Easy",calories:"~490",
+   tags:["dinner","lunch","vegan","vegetarian","healthy","gluten-free","meal-prep"],
+   description:"Roasted sweet potato and chickpeas with tahini dressing over quinoa.",
+   ingredients:[{name:"Sweet Potato",qty:"2 large"},{name:"Quinoa",qty:"1 cup dry"},{name:"Chickpeas",qty:"1 can, drained"},{name:"Tahini",qty:"3 tbsp"},{name:"Lemon",qty:"1"},{name:"Olive Oil",qty:"2 tbsp"},{name:"Cumin",qty:"1 tsp"},{name:"Garlic",qty:"1 clove"}],
+   steps:["Preheat oven 200°C/400°F. Cube sweet potato and toss with oil and cumin.","Toss chickpeas with oil and salt on a separate tray.","Roast both 25 min until caramelised.","Cook quinoa per packet (1 cup quinoa : 2 cups water, 15 min).","Make dressing: whisk tahini, lemon juice, minced garlic and 2 tbsp water.","Assemble bowls and drizzle with tahini dressing."],
+   tip:"Make a double batch of the roasted veg and chickpeas — they keep well for 3 days.",source:"local"},
+
+  {id:19, name:"Pasta Carbonara",emoji:"🍝",time:"20 min",servings:"2",difficulty:"Medium",calories:"~580",
+   tags:["dinner","italian","quick","comfort","pasta"],
+   description:"Silky egg-and-parmesan sauce clinging to pasta with crispy pancetta.",
+   ingredients:[{name:"Spaghetti",qty:"200g"},{name:"Eggs",qty:"3"},{name:"Bacon",qty:"100g, diced"},{name:"Parmesan Cheese",qty:"60g, grated"},{name:"Black Pepper",qty:"lots"},{name:"Garlic",qty:"1 clove"}],
+   steps:["Cook pasta in heavily salted water. Reserve 1 cup pasta water before draining.","Fry bacon until crispy. Add garlic briefly.","Whisk eggs with parmesan and a generous amount of black pepper.","Remove pan from heat. Add hot drained pasta to bacon.","Pour egg mixture over pasta, tossing rapidly — the residual heat cooks the eggs.","Add pasta water little by little until you have a glossy, silky sauce."],
+   tip:"Never reheat on the flame after adding the egg mixture — they will scramble.",source:"local"},
+
+  {id:20, name:"Vegetarian Chili",emoji:"🫘",time:"35 min",servings:"5",difficulty:"Easy",calories:"~360",
+   tags:["dinner","vegetarian","vegan","healthy","comfort","family","high-protein","meal-prep","gluten-free"],
+   description:"Hearty three-bean chili so good, nobody misses the meat.",
+   ingredients:[{name:"Kidney Beans",qty:"2 cans, drained"},{name:"Black Beans",qty:"1 can, drained"},{name:"Canned Tomatoes",qty:"2 cans"},{name:"Bell Peppers",qty:"2"},{name:"Onion",qty:"1"},{name:"Garlic",qty:"4 cloves"},{name:"Chili Powder",qty:"2 tbsp"},{name:"Cumin",qty:"1.5 tsp"},{name:"Smoked Paprika",qty:"1 tsp"}],
+   steps:["Dice onion and peppers. Sauté in oil 5 min.","Add garlic, chili powder, cumin and smoked paprika. Cook 1 min.","Add all beans and canned tomatoes. Stir well.","Simmer 25 min until thick and richly flavoured. Season generously.","Serve with sour cream, grated cheese and tortilla chips."],
+   tip:"Chili always tastes better the next day — make a big pot and enjoy it all week.",source:"local"},
+];
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
